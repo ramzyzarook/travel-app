@@ -36,7 +36,8 @@ export default function HomePage() {
   const [sortBy, setSortBy] = useState("newest");
 
   const sortedPosts = [...dummyPosts].sort((a, b) => {
-    if (sortBy === "newest") return new Date(b.date) - new Date(a.date);
+    if (sortBy === "newest")
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
     if (sortBy === "likes") return b.likes - a.likes;
     if (sortBy === "comments") return b.comments - a.comments;
     return 0;
@@ -45,11 +46,9 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0d1b2a] via-[#1b263b] to-black text-white font-sans">
       {/* Navigation */}
-      <nav className="flex justify-between items-center px-8 py-5 bg-[#0d1b2a] shadow-lg border-b border-blue-700">
-        <h1 className="text-3xl font-bold text-white tracking-wide">
-          TravelTales 🌍
-        </h1>
-        <div className="space-x-8 text-lg font-medium">
+      <nav className="flex justify-between items-center px-6 py-4 bg-[#0d1b2a] shadow-lg border-b border-blue-700">
+        <h1 className="text-2xl font-bold tracking-wide">TravelTales 🌍</h1>
+        <div className="space-x-6">
           <a href="/" className="hover:text-blue-400 transition">
             Home
           </a>
@@ -66,8 +65,10 @@ export default function HomePage() {
       </nav>
 
       {/* Sort Controls */}
-      <div className="flex items-center justify-between px-8 py-6">
-        <h2 className="text-2xl font-semibold">Recent & Popular Blogs</h2>
+      <div className="px-6 py-6 flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-white">
+          Recent & Popular Blog Posts
+        </h2>
         <div className="flex items-center space-x-3">
           <label htmlFor="sort" className="text-lg font-medium text-blue-300">
             Sort by:
@@ -91,23 +92,20 @@ export default function HomePage() {
       </div>
 
       {/* Blog Posts */}
-      <div className="px-8 pb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="px-6 pb-12 grid gap-6">
         {sortedPosts.map((post) => (
           <div
             key={post.id}
-            className="bg-[#1e293b] hover:bg-[#334155] transition-all duration-300 rounded-2xl shadow-lg overflow-hidden border border-blue-900"
+            className="bg-[#1b263b]/70 backdrop-blur-sm p-6 rounded-2xl shadow-lg hover:shadow-blue-400/40 transition"
           >
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-2">{post.title}</h2>
-              <p className="text-sm text-blue-200 mb-4">
-                By <span className="text-blue-400">{post.author}</span> in{" "}
-                <strong>{post.country}</strong> on{" "}
-                {new Date(post.date).toLocaleDateString()}
-              </p>
-              <div className="flex items-center justify-between text-sm text-gray-300">
-                <span>❤️ {post.likes} Likes</span>
-                <span>💬 {post.comments} Comments</span>
-              </div>
+            <h2 className="text-xl font-semibold text-white">{post.title}</h2>
+            <p className="text-sm text-blue-200 mb-2">
+              By <span className="text-blue-400">{post.author}</span> in{" "}
+              <strong>{post.country}</strong> on {post.date}
+            </p>
+            <div className="flex gap-6 mt-2 text-sm text-gray-300">
+              <span>❤️ {post.likes} likes</span>
+              <span>💬 {post.comments} comments</span>
             </div>
           </div>
         ))}
