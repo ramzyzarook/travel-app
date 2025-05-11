@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^11.10.0",
+    "jsonwebtoken": "^9.0.2",
     "next": "15.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-toastify": "^11.0.5",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {

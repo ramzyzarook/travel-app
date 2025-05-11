@@ -34,6 +34,7 @@ const dummyPosts = [
 
 export default function HomePage() {
   const [sortBy, setSortBy] = useState("newest");
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
 
   const sortedPosts = [...dummyPosts].sort((a, b) => {
     if (sortBy === "newest")
@@ -55,12 +56,30 @@ export default function HomePage() {
           <a href="/search" className="hover:text-blue-400 transition">
             Search
           </a>
-          <a href="/login" className="hover:text-blue-400 transition">
-            Login
-          </a>
-          <a href="/profile" className="hover:text-blue-400 transition">
-            Profile
-          </a>
+
+          {/* Conditional rendering of Login/Register or Profile/Logout */}
+          {isLoggedIn ? (
+            <>
+              <a href="/profile" className="hover:text-blue-400 transition">
+                Profile
+              </a>
+              <button
+                onClick={() => setIsLoggedIn(false)}
+                className="text-blue-400 hover:text-blue-500 transition"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <a href="/login" className="hover:text-blue-400 transition">
+                Login
+              </a>
+              <a href="/register" className="hover:text-blue-400 transition">
+                Register
+              </a>
+            </>
+          )}
         </div>
       </nav>
 
