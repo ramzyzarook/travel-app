@@ -33,7 +33,7 @@ export default function LoginPage() {
     toast.success("Login successful!"); // Show success toast
 
     setTimeout(() => {
-      router.push("/profile"); // Redirect to profile page after toast
+      router.push("/"); // Redirect to profile page after toast
     }, 2000); // Delay redirection to allow the toast to appear
   };
 

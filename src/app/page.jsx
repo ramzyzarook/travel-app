@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Import for navigation
 
 const dummyPosts = [
   {
@@ -35,6 +36,22 @@ const dummyPosts = [
 export default function HomePage() {
   const [sortBy, setSortBy] = useState("newest");
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+  const router = useRouter();
+
+  // Check if the user is logged in
+  useEffect(() => {
+    const token = localStorage.getItem("token"); // Get token from localStorage
+    if (token) {
+      setIsLoggedIn(true); // Set the user as logged in
+    }
+  }, []);
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove token from localStorage
+    setIsLoggedIn(false); // Update state
+    router.push("/"); // Redirect to home after logout
+  };
 
   const sortedPosts = [...dummyPosts].sort((a, b) => {
     if (sortBy === "newest")
@@ -64,7 +81,7 @@ export default function HomePage() {
                 Profile
               </a>
               <button
-                onClick={() => setIsLoggedIn(false)}
+                onClick={handleLogout}
                 className="text-blue-400 hover:text-blue-500 transition"
               >
                 Logout
