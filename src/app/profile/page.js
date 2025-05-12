@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const [posts, setPosts] = useState([]);
@@ -17,7 +17,7 @@ export default function ProfilePage() {
   const [selectedData, setSelectedData] = useState({});
   const [userId, setUserId] = useState(null);
   const [editingPostId, setEditingPostId] = useState(null);
-  const router = useRouter(); // Router instance for navigation
+  const router = useRouter();
 
   useEffect(() => {
     fetch("https://restcountries.com/v3.1/all")
@@ -54,9 +54,7 @@ export default function ProfilePage() {
       const flag = selected.flags?.png;
       const currency = Object.values(selected.currencies || {})[0]?.name;
       const capital = selected.capital?.[0];
-
       setSelectedData({ flag, currency, capital });
-
       setForm((prev) => ({ ...prev, country: countryName }));
     }
   };
@@ -113,121 +111,136 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    router.push("/login"); // Navigate to the login page after logout
+    router.push("/login");
+  };
+
+  const handleHomeRedirect = () => {
+    router.push("/");
   };
 
   return (
-    <div className="p-6 text-white bg-[#0d1b2a] min-h-screen">
+    <div className="min-h-screen bg-[#A1E3F9] text-[#002366] font-sans">
       {/* Navbar */}
-      <nav className="flex items-center justify-between p-4 bg-[#1b263b] rounded-lg mb-6">
-        <div className="flex items-center">
-          {/* <img src="/logo.png" alt="Logo" className="w-12 h-12 mr-4" />{" "} */}
-          {/* Logo */}
-          <a href="/" className="text-xl font-semibold text-white">
-            Home
-          </a>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+      <nav className="flex justify-between items-center px-6 py-4 bg-[#002366] text-white shadow-lg fixed top-0 left-0 w-full z-10">
+        <h1
+          className="text-2xl font-bold cursor-pointer"
+          onClick={handleHomeRedirect}
         >
-          Logout
-        </button>
+          TravelTales 🌍
+        </h1>
+        <div className="flex gap-4">
+          <button
+            onClick={handleHomeRedirect}
+            className="bg-[#0F52BA] text-white px-4 py-2 rounded-lg hover:bg-[#002366] text-sm"
+          >
+            Home
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm"
+          >
+            Logout
+          </button>
+        </div>
       </nav>
 
-      <h1 className="text-3xl font-bold mb-6">Manage Your Blog Posts</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4 mb-8">
-        <input
-          type="text"
-          placeholder="Title"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          required
-          className="w-full p-2 bg-[#1b263b] text-white rounded"
-        />
-        <textarea
-          placeholder="Content"
-          value={form.content}
-          onChange={(e) => setForm({ ...form, content: e.target.value })}
-          required
-          className="w-full p-2 bg-[#1b263b] text-white rounded"
-        />
-
-        <select
-          value={form.country}
-          onChange={(e) => handleSelectCountry(e.target.value)}
-          required
-          className="w-full p-2 bg-[#1b263b] text-white rounded"
-        >
-          <option value="">Select Country</option>
-          {countries.map((c) => (
-            <option key={c.cca3} value={c.name.common}>
-              {c.name.common}
-            </option>
-          ))}
-        </select>
-
-        <input
-          type="date"
-          value={form.visit_date}
-          onChange={(e) => setForm({ ...form, visit_date: e.target.value })}
-          required
-          className="w-full p-2 bg-[#1b263b] text-white rounded"
-        />
-
-        {/* Optional preview of selected country data */}
-        {selectedData.flag && (
-          <div className="flex items-center gap-4">
-            <img src={selectedData.flag} alt="flag" className="w-10 h-6" />
-            <p>Capital: {selectedData.capital}</p>
-            <p>Currency: {selectedData.currency}</p>
-          </div>
-        )}
-
-        <button
-          type="submit"
-          className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-        >
-          {editingPostId ? "Update Post" : "Create Post"}
-        </button>
-      </form>
-
-      <h2 className="text-2xl font-semibold mb-4">Your Posts</h2>
-      {posts.length === 0 ? (
-        <p className="text-gray-400">No posts found for your account.</p>
-      ) : (
-        posts.map((post) => (
-          <div key={post.id} className="bg-[#1b263b] p-4 rounded mb-4">
-            <h3 className="text-xl font-bold">{post.title}</h3>
-            <p className="mb-2">{post.content}</p>
-            <p className="text-sm text-blue-300">
-              Visited: {post.country} on {post.visit_date}
-            </p>
-            {post.flag && (
-              <img src={post.flag} alt="flag" className="w-12 mt-2" />
-            )}
-            <p className="text-sm">
-              Capital: {post.capital} | Currency: {post.currency}
-            </p>
-
-            <div className="mt-4">
-              <button
-                onClick={() => handleEdit(post)}
-                className="mr-2 bg-yellow-500 text-white px-4 py-2 rounded"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(post.id)}
-                className="bg-red-600 text-white px-4 py-2 rounded"
-              >
-                Delete
-              </button>
+      {/* Blog Post Form */}
+      <div className="pt-[6rem] px-6 max-w-3xl mx-auto">
+        <h2 className="text-2xl font-semibold mb-6">Manage Your Blog Posts</h2>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <input
+            type="text"
+            placeholder="Title"
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            required
+            className="w-full p-4 bg-white border border-[#0F52BA] text-black text-sm rounded-lg focus:ring-2 focus:ring-[#002366]"
+          />
+          <textarea
+            placeholder="Content"
+            value={form.content}
+            onChange={(e) => setForm({ ...form, content: e.target.value })}
+            required
+            className="w-full p-4 bg-white border border-[#0F52BA] text-black text-sm rounded-lg focus:ring-2 focus:ring-[#002366]"
+          />
+          <select
+            value={form.country}
+            onChange={(e) => handleSelectCountry(e.target.value)}
+            required
+            className="w-full p-4 bg-white border border-[#0F52BA] text-black text-sm rounded-lg focus:ring-2 focus:ring-[#002366]"
+          >
+            <option value="">Select Country</option>
+            {countries.map((c) => (
+              <option key={c.cca3} value={c.name.common}>
+                {c.name.common}
+              </option>
+            ))}
+          </select>
+          <input
+            type="date"
+            value={form.visit_date}
+            onChange={(e) => setForm({ ...form, visit_date: e.target.value })}
+            required
+            className="w-full p-4 bg-white border border-[#0F52BA] text-black text-sm rounded-lg focus:ring-2 focus:ring-[#002366]"
+          />
+          {selectedData.flag && (
+            <div className="flex items-center gap-4 text-sm">
+              <img src={selectedData.flag} alt="flag" className="w-10 h-6" />
+              <span>Capital: {selectedData.capital}</span>
+              <span>Currency: {selectedData.currency}</span>
             </div>
-          </div>
-        ))
-      )}
+          )}
+          <button
+            type="submit"
+            className="bg-[#0F52BA] text-white px-6 py-3 rounded-lg hover:bg-[#002366] text-sm"
+          >
+            {editingPostId ? "Update Post" : "Create Post"}
+          </button>
+        </form>
+      </div>
+
+      {/* Posts Section */}
+      <div className="pt-12 px-6 max-w-5xl mx-auto">
+        <h2 className="text-2xl font-semibold mb-6">Your Posts</h2>
+        {posts.length === 0 ? (
+          <p className="text-gray-500 text-sm">
+            No posts found for your account.
+          </p>
+        ) : (
+          posts.map((post) => (
+            <div
+              key={post.id}
+              className="bg-gradient-to-r from-[#020407] to-[#330381] text-white p-6 rounded-lg mb-6"
+            >
+              <h3 className="text-lg font-bold">{post.title}</h3>
+              <p className="text-sm my-2">{post.content}</p>
+              <p className="text-xs text-blue-300 mb-2">
+                Visited: {post.country} on {post.visit_date}
+              </p>
+              {post.flag && (
+                <img src={post.flag} alt="flag" className="w-12 mb-2" />
+              )}
+              <p className="text-xs">
+                Capital: {post.capital} | Currency: {post.currency}
+              </p>
+              <div className="mt-4 flex gap-4">
+                <button
+                  onClick={() => handleEdit(post)}
+                  className="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(post.id)}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
