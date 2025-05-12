@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Import for navigation
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const dummyPosts = [
   {
@@ -35,22 +36,20 @@ const dummyPosts = [
 
 export default function HomePage() {
   const [sortBy, setSortBy] = useState("newest");
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
-  // Check if the user is logged in
   useEffect(() => {
-    const token = localStorage.getItem("token"); // Get token from localStorage
+    const token = localStorage.getItem("token");
     if (token) {
-      setIsLoggedIn(true); // Set the user as logged in
+      setIsLoggedIn(true);
     }
   }, []);
 
-  // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Remove token from localStorage
-    setIsLoggedIn(false); // Update state
-    router.push("/"); // Redirect to home after logout
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    router.push("/");
   };
 
   const sortedPosts = [...dummyPosts].sort((a, b) => {
@@ -67,19 +66,17 @@ export default function HomePage() {
       <nav className="flex justify-between items-center px-6 py-4 bg-[#0d1b2a] shadow-lg border-b border-blue-700">
         <h1 className="text-2xl font-bold tracking-wide">TravelTales 🌍</h1>
         <div className="space-x-6">
-          <a href="/" className="hover:text-blue-400 transition">
+          <Link href="/" className="hover:text-blue-400 transition">
             Home
-          </a>
-          <a href="/search" className="hover:text-blue-400 transition">
+          </Link>
+          <Link href="/search" className="hover:text-blue-400 transition">
             Search
-          </a>
-
-          {/* Conditional rendering of Login/Register or Profile/Logout */}
+          </Link>
           {isLoggedIn ? (
             <>
-              <a href="/profile" className="hover:text-blue-400 transition">
+              <Link href="/profile" className="hover:text-blue-400 transition">
                 Profile
-              </a>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="text-blue-400 hover:text-blue-500 transition"
@@ -89,12 +86,12 @@ export default function HomePage() {
             </>
           ) : (
             <>
-              <a href="/login" className="hover:text-blue-400 transition">
+              <Link href="/login" className="hover:text-blue-400 transition">
                 Login
-              </a>
-              <a href="/register" className="hover:text-blue-400 transition">
+              </Link>
+              <Link href="/register" className="hover:text-blue-400 transition">
                 Register
-              </a>
+              </Link>
             </>
           )}
         </div>
@@ -142,6 +139,14 @@ export default function HomePage() {
             <div className="flex gap-6 mt-2 text-sm text-gray-300">
               <span>❤️ {post.likes} likes</span>
               <span>💬 {post.comments} comments</span>
+            </div>
+            <div className="mt-4">
+              <Link
+                href={`/blog/${post.id}`}
+                className="inline-block px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-full text-sm transition"
+              >
+                Read More →
+              </Link>
             </div>
           </div>
         ))}

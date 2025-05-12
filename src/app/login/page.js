@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify"; // Import toast
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -27,13 +27,16 @@ export default function LoginPage() {
       return;
     }
 
-    const { token } = await response.json();
-    localStorage.setItem("token", token); // Store token in localStorage
+    const { token, userId } = await response.json();
 
-    toast.success("Login successful!"); // Show success toast
+    // Store token and userId in localStorage
+    localStorage.setItem("token", token);
+    localStorage.setItem("user_id", userId); // Store user_id
+
+    toast.success("Login successful!");
 
     setTimeout(() => {
-      router.push("/"); // Redirect to profile page after toast
+      router.push("/profile"); // Redirect to profile page after toast
     }, 2000); // Delay redirection to allow the toast to appear
   };
 
