@@ -71,6 +71,27 @@ export default function HomePage() {
     return 0;
   });
 
+  // Handle like functionality
+  const handleLike = async (postId) => {
+    const updatedPosts = posts.map((post) => {
+      if (post.id === postId) {
+        post.likes += 1; // Increment the like count
+      }
+      return post;
+    });
+
+    setPosts(updatedPosts); // Update the state with the new like count
+
+    // Optionally, send the updated like count to the backend
+    await fetch(`/api/posts/${postId}/like`, {
+      method: "POST",
+      body: JSON.stringify({
+        likes: updatedPosts.find((post) => post.id === postId).likes,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0d1b2a] via-[#1b263b] to-black text-white font-sans">
       {/* Navigation */}
@@ -158,9 +179,31 @@ export default function HomePage() {
               </span>
             </div>
 
+            {/* Flag and Country Data */}
+            {post.countryFlag && (
+              <img
+                src={post.countryFlag}
+                alt="Country Flag"
+                className="w-16 h-10 mt-4"
+              />
+            )}
+            {post.currency && (
+              <p className="text-sm mt-2 text-gray-200">
+                Currency: {post.currency}
+              </p>
+            )}
+            {post.capital && (
+              <p className="text-sm mt-1 text-gray-200">
+                Capital: {post.capital}
+              </p>
+            )}
+
+            {/* Blog Content */}
+            <p className="mt-4 text-gray-300">{post.content}</p>
+
             {/* Like Button */}
             <button
-              onClick={() => handleLike(post.id)} // Handle like functionality
+              onClick={() => handleLike(post.id)} // Now the function is defined
               className="mt-4 bg-blue-600 px-4 py-2 text-white rounded-full"
             >
               Like
