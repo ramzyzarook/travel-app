@@ -182,62 +182,108 @@ export default function HomePage() {
             key={post.id}
             className="bg-gradient-to-r from-[#020407] to-[#330381] text-white p-6 rounded-xl shadow-lg"
           >
-            <h2 className="text-xl font-bold">{post.title}</h2>
-            <p className="text-sm mb-2">
-              By <span className="text-[#dbd111]">{post.author}</span> in{" "}
-              <strong>{post.country}</strong> on {post.date}
-            </p>
-            <div className="flex gap-6 mt-2 text-sm">
-              <span>❤️ {post.likes} likes</span>
-              <span>
-                💬 {post.comments ? post.comments.length : 0} comments
-              </span>
+            {/* Top section */}
+            <div className="flex justify-between flex-wrap">
+              {/* Left Top */}
+              <div className="space-y-1 pr-4 max-w-lg">
+                <h2 className="text-2xl font-bold">{post.title}</h2>
+                <p className="text-sm">
+                  By{" "}
+                  <span className="text-[#dbd111] font-medium">
+                    {post.author}
+                  </span>
+                </p>
+                <p className="text-sm">
+                  Visited: {post.country} on {post.date}
+                </p>
+                <div className="flex gap-4 text-sm">
+                  <span>❤️ {post.likes} likes</span>
+                  <span>💬 {post.comments?.length || 0} comments</span>
+                </div>
+              </div>
+
+              {/* Right Top */}
+
+              {/* Currency & Capital Section - Below the Flag */}
+              <div className="mt-4 flex flex-col justify-start ml-4">
+                {post.currency && (
+                  <p className="text-base mb-2">
+                    💱 <span className="font-medium">Currency:</span>{" "}
+                    {post.currency}
+                  </p>
+                )}
+                {post.capital && (
+                  <p className="text-base">
+                    🏙️ <span className="font-medium">Capital:</span>{" "}
+                    {post.capital}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-between mt-4">
+                {/* Flag Section */}
+                {post.flag && (
+                  <div className="w-32 h-20 rounded-lg border border-white shadow-md">
+                    <img
+                      src={post.flag}
+                      alt={`${post.country} flag`}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-            {post.countryFlag && (
-              <img
-                src={post.countryFlag}
-                alt="Country Flag"
-                className="w-16 h-10 mt-4 rounded"
-              />
-            )}
-            {post.currency && (
-              <p className="text-sm mt-2">Currency: {post.currency}</p>
-            )}
-            {post.capital && (
-              <p className="text-sm mt-1">Capital: {post.capital}</p>
-            )}
-            <p className="mt-4">{post.content}</p>
 
-            <button
-              onClick={() => handleLike(post.id)}
-              className="mt-4 bg-[#0F52BA] text-white px-4 py-2 rounded-full hover:bg-[#002366] transition"
-            >
-              Like ❤️
-            </button>
+            {/* Content */}
+            <div className="mt-6 text-justify text-base leading-relaxed px-2">
+              {post.content}
+            </div>
 
+            {/* Like button - center */}
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => handleLike(post.id)}
+                className="bg-gradient-to-r from-[#4e54c8] to-[#8f94fb] text-white px-6 py-2 rounded-full font-semibold shadow-md hover:scale-105 transform transition-all duration-300"
+              >
+                ❤️ Like this post
+              </button>
+            </div>
+
+            {/* Comment input - center */}
             {isLoggedIn && (
-              <div className="mt-4">
+              <div className="mt-6 flex flex-col items-center">
                 <textarea
                   value={post.newComment || ""}
                   onChange={(e) => handleCommentInput(e, post.id)}
-                  placeholder="Write your thoughts..."
-                  className="w-full p-2 rounded-md border border-[#0F52BA] text-white focus:outline-none"
+                  placeholder="Share your thoughts..."
+                  className="w-full md:w-2/3 p-3 rounded-lg border border-[#0F52BA] bg-[#0a0a23] text-white focus:ring-2 focus:ring-[#4e54c8] outline-none"
                 />
                 <button
                   onClick={() => handleComment(post.id)}
-                  className="mt-2 bg-[#0F52BA] text-white px-4 py-2 rounded-full hover:bg-[#002366] transition"
+                  className="mt-3 bg-gradient-to-r from-[#36d1dc] to-[#5b86e5] text-white px-6 py-2 rounded-full font-semibold shadow-md hover:scale-105 transform transition-all duration-300"
                 >
-                  Submit Comment 💬
+                  💬 Submit Comment
                 </button>
               </div>
             )}
 
+            {/* Comments List */}
             {post.comments && post.comments.length > 0 && (
-              <ul className="mt-4 space-y-1 text-sm text-white">
-                {post.comments.map((comment, index) => (
-                  <li key={index}>• {comment}</li>
-                ))}
-              </ul>
+              <div className="mt-6 px-4 py-3 rounded-lg bg-[#1e1e2f] border border-[#4e54c8] shadow-inner">
+                <h3 className="text-md font-semibold text-[#dbd111] mb-2">
+                  Comments:
+                </h3>
+                <ul className="text-sm text-white space-y-2">
+                  {post.comments.map((comment, index) => (
+                    <li
+                      key={index}
+                      className="bg-[#2a2a3d] p-2 rounded-md shadow-sm"
+                    >
+                      • {comment}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         ))}
