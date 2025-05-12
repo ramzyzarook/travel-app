@@ -1,42 +1,13 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; // Already imported
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-const dummyPosts = [
-  {
-    id: 1,
-    title: "Exploring Tokyo",
-    author: "alice",
-    country: "Japan",
-    date: "2023-09-10",
-    likes: 10,
-    comments: 5,
-  },
-  {
-    id: 2,
-    title: "Sunset in Santorini",
-    author: "bob",
-    country: "Greece",
-    date: "2024-04-01",
-    likes: 22,
-    comments: 12,
-  },
-  {
-    id: 3,
-    title: "Hiking in Patagonia",
-    author: "carol",
-    country: "Argentina",
-    date: "2023-12-15",
-    likes: 5,
-    comments: 1,
-  },
-];
 
 export default function HomePage() {
   const [sortBy, setSortBy] = useState("newest");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [newComment, setNewComment] = useState(""); // Track new comment input
   const router = useRouter();
 
   useEffect(() => {
@@ -46,17 +17,57 @@ export default function HomePage() {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    router.push("/");
+  // Fetch posts from the server when the component mounts
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch("/api/posts"); // Adjust this to your backend API route
+        const data = await response.json();
+        setPosts(data);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    };
+    fetchPosts();
+  }, []);
+
+  // Handle comment input change
+  const handleCommentInput = (e) => {
+    setNewComment(e.target.value);
   };
 
-  const sortedPosts = [...dummyPosts].sort((a, b) => {
+  // Handle comment submission
+  const handleComment = async (postId) => {
+    if (newComment.trim() === "") return;
+
+    // Make sure that comments is initialized as an array
+    const updatedPosts = posts.map((post) => {
+      if (post.id === postId) {
+        if (!post.comments) {
+          post.comments = []; // Initialize the comments array if it doesn't exist
+        }
+        post.comments.push(newComment); // Add the new comment
+      }
+      return post;
+    });
+
+    setPosts(updatedPosts); // Update the state with the new comment
+    setNewComment(""); // Clear the comment input
+
+    // Optionally, send the comment to the backend
+    await fetch(`/api/posts/${postId}/comment`, {
+      method: "POST",
+      body: JSON.stringify({ comment: newComment }),
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
+  // Sort the posts based on the selected option
+  const sortedPosts = [...posts].sort((a, b) => {
     if (sortBy === "newest")
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     if (sortBy === "likes") return b.likes - a.likes;
-    if (sortBy === "comments") return b.comments - a.comments;
+    if (sortBy === "comments") return b.comments.length - a.comments.length;
     return 0;
   });
 
@@ -78,7 +89,11 @@ export default function HomePage() {
                 Profile
               </Link>
               <button
-                onClick={handleLogout}
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  setIsLoggedIn(false);
+                  router.push("/");
+                }}
                 className="text-blue-400 hover:text-blue-500 transition"
               >
                 Logout
@@ -138,15 +153,47 @@ export default function HomePage() {
             </p>
             <div className="flex gap-6 mt-2 text-sm text-gray-300">
               <span>❤️ {post.likes} likes</span>
-              <span>💬 {post.comments} comments</span>
+              <span>
+                💬 {post.comments ? post.comments.length : 0} comments
+              </span>
             </div>
+
+            {/* Like Button */}
+            <button
+              onClick={() => handleLike(post.id)} // Handle like functionality
+              className="mt-4 bg-blue-600 px-4 py-2 text-white rounded-full"
+            >
+              Like
+            </button>
+
+            {/* Comment Section */}
+            {isLoggedIn && (
+              <div className="mt-4">
+                <textarea
+                  value={newComment}
+                  onChange={handleCommentInput}
+                  placeholder="Add a comment..."
+                  className="w-full p-2 text-black rounded-md"
+                />
+                <button
+                  onClick={() => handleComment(post.id)}
+                  className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-full"
+                >
+                  Submit Comment
+                </button>
+              </div>
+            )}
+
             <div className="mt-4">
-              <Link
-                href={`/blog/${post.id}`}
-                className="inline-block px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-full text-sm transition"
-              >
-                Read More →
-              </Link>
+              {post.comments && post.comments.length > 0 && (
+                <ul>
+                  {post.comments.map((comment, index) => (
+                    <li key={index} className="text-sm text-gray-300">
+                      {comment}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         ))}

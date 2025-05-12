@@ -15,7 +15,8 @@ db.prepare(
 ).run();
 
 // Drop and recreate posts table (for development only)
-db.prepare(`DROP TABLE IF EXISTS posts`).run();
+// Ensure the posts table includes likes and comments
+// db.prepare(`DROP TABLE IF EXISTS posts`).run();
 
 db.prepare(
   `
@@ -29,6 +30,8 @@ db.prepare(
     flag TEXT,
     currency TEXT,
     capital TEXT,
+    likes INTEGER DEFAULT 0,  -- Add likes column
+    comments INTEGER DEFAULT 0,  -- Add comments column
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
   )

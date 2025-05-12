@@ -15,10 +15,10 @@ export default function ProfilePage() {
   const [countries, setCountries] = useState([]);
   const [selectedData, setSelectedData] = useState({});
   const [userId, setUserId] = useState(null);
-  const [editingPostId, setEditingPostId] = useState(null); // Track post being edited
+  const [editingPostId, setEditingPostId] = useState(null);
 
+  // Load countries on mount
   useEffect(() => {
-    // Load countries
     fetch("https://restcountries.com/v3.1/all")
       .then((res) => res.json())
       .then((data) =>
@@ -26,21 +26,31 @@ export default function ProfilePage() {
           data.sort((a, b) => a.name.common.localeCompare(b.name.common))
         )
       );
+  }, []);
 
-    // Decode the JWT token and get the user ID
-    const token = localStorage.getItem("token"); // Get the token from localStorage
+  // Load user ID from JWT
+  useEffect(() => {
+    const token = localStorage.getItem("token");
     if (token) {
-      const decoded = jwtDecode(token); // Decode the token
-      setUserId(decoded.userId); // Set userId from the token
+      const decoded = jwtDecode(token);
+      console.log("Decoded userId:", decoded.userId);
+      setUserId(decoded.userId);
     }
+  }, []);
 
-    // Fetch user posts
+  // Load posts after userId is set
+  useEffect(() => {
     if (userId) {
-      axios
-        .get("/api/posts")
-        .then((res) => setPosts(res.data.filter((p) => p.user_id === userId)));
+      axios.get("/api/posts").then((res) => {
+        console.log("All fetched posts:", res.data);
+        const userPosts = res.data.filter(
+          (p) => String(p.user_id) === String(userId)
+        );
+        console.log("Filtered user posts:", userPosts);
+        setPosts(userPosts);
+      });
     }
-  }, [userId]); // Re-run the effect when userId changes
+  }, [userId]);
 
   const handleSelectCountry = (countryName) => {
     const selected = countries.find((c) => c.name.common === countryName);
@@ -55,9 +65,11 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    if (!userId) return;
 
     if (editingPostId) {
-      // Update existing post
       await axios.put(
         `/api/posts/${editingPostId}`,
         {
@@ -67,31 +79,37 @@ export default function ProfilePage() {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Attach token
+            Authorization: `Bearer ${token}`,
           },
         }
       );
     } else {
-      // Create new post
-      await axios.post("/api/posts", {
-        ...form,
-        user_id: userId,
-        ...selectedData,
-      });
+      await axios.post(
+        "/api/posts",
+        {
+          ...form,
+          user_id: userId,
+          ...selectedData,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
     }
 
-    setEditingPostId(null); // Reset editing state
+    setEditingPostId(null);
     setForm({
       title: "",
       content: "",
       country: "",
       visit_date: "",
-    }); // Clear the form
-    location.reload(); // Refresh the posts
+    });
+    location.reload(); // Refresh posts
   };
 
   const handleEdit = (post) => {
-    // Pre-fill the form with post data for editing
     setEditingPostId(post.id);
     setForm({
       title: post.title,
@@ -107,9 +125,8 @@ export default function ProfilePage() {
   };
 
   const handleDelete = async (postId) => {
-    // Delete the post
     await axios.delete(`/api/posts/${postId}`);
-    setPosts(posts.filter((post) => post.id !== postId)); // Remove from state
+    setPosts(posts.filter((post) => post.id !== postId));
   };
 
   return (
@@ -167,36 +184,40 @@ export default function ProfilePage() {
       </form>
 
       <h2 className="text-2xl font-semibold mb-4">Your Posts</h2>
-      {posts.map((post) => (
-        <div key={post.id} className="bg-[#1b263b] p-4 rounded mb-4">
-          <h3 className="text-xl font-bold">{post.title}</h3>
-          <p>{post.content}</p>
-          <p className="text-sm text-blue-300">
-            Visited: {post.country} on {post.visit_date}
-          </p>
-          {post.flag && (
-            <img src={post.flag} alt="flag" className="w-12 mt-2" />
-          )}
-          <p className="text-sm">
-            Capital: {post.capital}, Currency: {post.currency}
-          </p>
+      {posts.length === 0 ? (
+        <p className="text-gray-400">No posts found for your account.</p>
+      ) : (
+        posts.map((post) => (
+          <div key={post.id} className="bg-[#1b263b] p-4 rounded mb-4">
+            <h3 className="text-xl font-bold">{post.title}</h3>
+            <p>{post.content}</p>
+            <p className="text-sm text-blue-300">
+              Visited: {post.country} on {post.visit_date}
+            </p>
+            {post.flag && (
+              <img src={post.flag} alt="flag" className="w-12 mt-2" />
+            )}
+            <p className="text-sm">
+              Capital: {post.capital}, Currency: {post.currency}
+            </p>
 
-          <div className="mt-4">
-            <button
-              onClick={() => handleEdit(post)}
-              className="mr-2 bg-yellow-500 text-white px-4 py-2 rounded"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => handleDelete(post.id)}
-              className="bg-red-600 text-white px-4 py-2 rounded"
-            >
-              Delete
-            </button>
+            <div className="mt-4">
+              <button
+                onClick={() => handleEdit(post)}
+                className="mr-2 bg-yellow-500 text-white px-4 py-2 rounded"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(post.id)}
+                className="bg-red-600 text-white px-4 py-2 rounded"
+              >
+                Delete
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 }
