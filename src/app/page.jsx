@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react"; // Already imported
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -18,48 +18,57 @@ export default function HomePage() {
   }, []);
 
   // Fetch posts from the server when the component mounts
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch("/api/posts");
+      if (!response.ok) throw new Error("Failed to fetch posts");
+      const data = await response.json();
+      console.log("Posts data:", data);
+      setPosts(data);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      // You could show an error message to the user here if needed
+    }
+  };
+
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch("/api/posts"); // Adjust this to your backend API route
-        const data = await response.json();
-        setPosts(data);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
-    };
     fetchPosts();
   }, []);
 
   // Handle comment input change
-  const handleCommentInput = (e) => {
-    setNewComment(e.target.value);
+  const handleCommentInput = (e, postId) => {
+    setPosts(
+      posts.map((post) =>
+        post.id === postId ? { ...post, newComment: e.target.value } : post
+      )
+    );
   };
 
   // Handle comment submission
   const handleComment = async (postId) => {
-    if (newComment.trim() === "") return;
+    const comment = posts.find((post) => post.id === postId)?.newComment;
+    if (!comment?.trim()) return;
 
-    // Make sure that comments is initialized as an array
-    const updatedPosts = posts.map((post) => {
-      if (post.id === postId) {
-        if (!post.comments) {
-          post.comments = []; // Initialize the comments array if it doesn't exist
-        }
-        post.comments.push(newComment); // Add the new comment
-      }
-      return post;
-    });
+    try {
+      // Optionally, send the comment to the backend
+      await fetch(`/api/posts/${postId}/comment`, {
+        method: "POST",
+        body: JSON.stringify({ comment }),
+        headers: { "Content-Type": "application/json" },
+      });
 
-    setPosts(updatedPosts); // Update the state with the new comment
-    setNewComment(""); // Clear the comment input
-
-    // Optionally, send the comment to the backend
-    await fetch(`/api/posts/${postId}/comment`, {
-      method: "POST",
-      body: JSON.stringify({ comment: newComment }),
-      headers: { "Content-Type": "application/json" },
-    });
+      // Update posts state optimistically
+      setPosts(
+        posts.map((post) =>
+          post.id === postId
+            ? { ...post, comments: [...post.comments, comment], newComment: "" }
+            : post
+        )
+      );
+    } catch (error) {
+      console.error("Error submitting comment:", error);
+      // Handle error gracefully, possibly show an error message
+    }
   };
 
   // Sort the posts based on the selected option
@@ -82,14 +91,20 @@ export default function HomePage() {
 
     setPosts(updatedPosts); // Update the state with the new like count
 
-    // Optionally, send the updated like count to the backend
-    await fetch(`/api/posts/${postId}/like`, {
-      method: "POST",
-      body: JSON.stringify({
-        likes: updatedPosts.find((post) => post.id === postId).likes,
-      }),
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      await fetch(`/api/posts/${postId}/like`, {
+        method: "POST",
+        body: JSON.stringify({
+          likes: updatedPosts.find((post) => post.id === postId).likes,
+        }),
+        headers: { "Content-Type": "application/json" },
+      });
+
+      // Optionally re-fetch the posts or handle likes through optimistic UI
+    } catch (error) {
+      console.error("Error updating like:", error);
+      // Handle error gracefully
+    }
   };
 
   return (
@@ -213,8 +228,8 @@ export default function HomePage() {
             {isLoggedIn && (
               <div className="mt-4">
                 <textarea
-                  value={newComment}
-                  onChange={handleCommentInput}
+                  value={post.newComment || ""}
+                  onChange={(e) => handleCommentInput(e, post.id)}
                   placeholder="Add a comment..."
                   className="w-full p-2 text-black rounded-md"
                 />

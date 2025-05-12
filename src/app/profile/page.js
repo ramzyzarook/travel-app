@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 export default function ProfilePage() {
   const [posts, setPosts] = useState([]);
@@ -16,6 +17,7 @@ export default function ProfilePage() {
   const [selectedData, setSelectedData] = useState({});
   const [userId, setUserId] = useState(null);
   const [editingPostId, setEditingPostId] = useState(null);
+  const router = useRouter(); // Router instance for navigation
 
   useEffect(() => {
     fetch("https://restcountries.com/v3.1/all")
@@ -55,7 +57,6 @@ export default function ProfilePage() {
 
       setSelectedData({ flag, currency, capital });
 
-      // Optional: auto-populate selectedData into form for preview (or debugging)
       setForm((prev) => ({ ...prev, country: countryName }));
     }
   };
@@ -84,7 +85,7 @@ export default function ProfilePage() {
     setEditingPostId(null);
     setForm({ title: "", content: "", country: "", visit_date: "" });
     setSelectedData({});
-    location.reload(); // You can refactor this to use setPosts instead
+    location.reload();
   };
 
   const handleEdit = (post) => {
@@ -110,8 +111,30 @@ export default function ProfilePage() {
     setPosts(posts.filter((post) => post.id !== postId));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/login"); // Navigate to the login page after logout
+  };
+
   return (
     <div className="p-6 text-white bg-[#0d1b2a] min-h-screen">
+      {/* Navbar */}
+      <nav className="flex items-center justify-between p-4 bg-[#1b263b] rounded-lg mb-6">
+        <div className="flex items-center">
+          {/* <img src="/logo.png" alt="Logo" className="w-12 h-12 mr-4" />{" "} */}
+          {/* Logo */}
+          <a href="/" className="text-xl font-semibold text-white">
+            Home
+          </a>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        >
+          Logout
+        </button>
+      </nav>
+
       <h1 className="text-3xl font-bold mb-6">Manage Your Blog Posts</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4 mb-8">

@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     // Fetch posts with full relevant data including content and country metadata
+    console.log("Fetching posts...");
     const posts = db
       .prepare(
         `SELECT posts.id, posts.title, posts.content, posts.user_id, users.email AS author, 
