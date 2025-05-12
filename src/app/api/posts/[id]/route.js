@@ -1,93 +1,81 @@
 import db from "../../../lib/db";
 import { NextResponse } from "next/server";
-import { jwtDecode } from "jwt-decode";
 
-// Function to get the userId from the JWT token
-const getUserIdFromToken = (token) => {
+// GET /api/posts/[id] - Get a single post by ID
+export async function GET(_, { params }) {
   try {
-    const decoded = jwtDecode(token);
-    return decoded.userId;
-  } catch (err) {
-    return null; // If token is invalid, return null
+    const { id } = params;
+    const stmt = db.prepare(
+      `SELECT posts.id, posts.title, posts.content, posts.user_id, users.email AS author,
+              posts.country, posts.flag, posts.currency, posts.capital, posts.visit_date,
+              posts.created_at AS date, posts.likes, posts.comments
+       FROM posts 
+       JOIN users ON users.id = posts.user_id 
+       WHERE posts.id = ?`
+    );
+    const post = stmt.get(id);
+
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(post);
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch post" },
+      { status: 500 }
+    );
   }
-};
-
-// Get a specific post
-export async function GET(_, { params, request }) {
-  const post = db.prepare("SELECT * FROM posts WHERE id = ?").get(params.id);
-
-  if (!post) {
-    return NextResponse.json({ error: "Post not found" }, { status: 404 });
-  }
-
-  return NextResponse.json(post);
 }
 
-// Update a post
-export async function PUT(req, { params, request }) {
-  const { title, content, country, visit_date, flag, currency, capital } =
-    await req.json();
+// PUT /api/posts/[id] - Update a post by ID
+export async function PUT(req, { params }) {
+  try {
+    const { id } = params;
+    const { title, content, visit_date, country, flag, currency, capital } =
+      await req.json();
 
-  const token = request?.headers?.authorization?.split(" ")[1]; // Bearer token
-  const userId = getUserIdFromToken(token);
+    const stmt = db.prepare(
+      `UPDATE posts 
+       SET title = ?, content = ?, visit_date = ?, country = ?, flag = ?, currency = ?, capital = ? 
+       WHERE id = ?`
+    );
 
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const info = stmt.run(
+      title,
+      content,
+      visit_date,
+      country,
+      flag,
+      currency,
+      capital,
+      id
+    );
+
+    return NextResponse.json({ success: info.changes > 0 });
+  } catch (error) {
+    console.error("Error updating post:", error);
+    return NextResponse.json(
+      { error: "Failed to update post" },
+      { status: 500 }
+    );
   }
-
-  // Fetch the post to ensure the user is the owner
-  const post = db.prepare("SELECT * FROM posts WHERE id = ?").get(params.id);
-
-  if (!post) {
-    return NextResponse.json({ error: "Post not found" }, { status: 404 });
-  }
-
-  if (post.user_id !== userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  db.prepare(
-    `
-    UPDATE posts
-    SET title = ?, content = ?, country = ?, visit_date = ?, flag = ?, currency = ?, capital = ?
-    WHERE id = ?
-  `
-  ).run(
-    title,
-    content,
-    country,
-    visit_date,
-    flag,
-    currency,
-    capital,
-    params.id
-  );
-
-  return NextResponse.json({ success: true });
 }
 
+// DELETE /api/posts/[id] - Delete a post by ID
+export async function DELETE(_, { params }) {
+  try {
+    const { id } = params;
+    const stmt = db.prepare(`DELETE FROM posts WHERE id = ?`);
+    const info = stmt.run(id);
 
-// Delete a post
-export async function DELETE(req, { params, request }) {
-  const token = request.headers.get("Authorization")?.split(" ")[1]; // Bearer token
-  const userId = getUserIdFromToken(token);
-
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: info.changes > 0 });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    return NextResponse.json(
+      { error: "Failed to delete post" },
+      { status: 500 }
+    );
   }
-
-  // Fetch the post to ensure the user is the owner
-  const post = db.prepare("SELECT * FROM posts WHERE id = ?").get(params.id);
-
-  if (!post) {
-    return NextResponse.json({ error: "Post not found" }, { status: 404 });
-  }
-
-  if (post.user_id !== userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  db.prepare("DELETE FROM posts WHERE id = ?").run(params.id);
-
-  return NextResponse.json({ success: true });
 }

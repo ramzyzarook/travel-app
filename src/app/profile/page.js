@@ -17,7 +17,6 @@ export default function ProfilePage() {
   const [userId, setUserId] = useState(null);
   const [editingPostId, setEditingPostId] = useState(null);
 
-  // Load countries on mount
   useEffect(() => {
     fetch("https://restcountries.com/v3.1/all")
       .then((res) => res.json())
@@ -28,25 +27,20 @@ export default function ProfilePage() {
       );
   }, []);
 
-  // Load user ID from JWT
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = jwtDecode(token);
-      console.log("Decoded userId:", decoded.userId);
       setUserId(decoded.userId);
     }
   }, []);
 
-  // Load posts after userId is set
   useEffect(() => {
     if (userId) {
       axios.get("/api/posts").then((res) => {
-        console.log("All fetched posts:", res.data);
         const userPosts = res.data.filter(
           (p) => String(p.user_id) === String(userId)
         );
-        console.log("Filtered user posts:", userPosts);
         setPosts(userPosts);
       });
     }
@@ -55,58 +49,42 @@ export default function ProfilePage() {
   const handleSelectCountry = (countryName) => {
     const selected = countries.find((c) => c.name.common === countryName);
     if (selected) {
-      setSelectedData({
-        flag: selected.flags?.png,
-        currency: Object.values(selected.currencies || {})[0]?.name,
-        capital: selected.capital?.[0],
-      });
+      const flag = selected.flags?.png;
+      const currency = Object.values(selected.currencies || {})[0]?.name;
+      const capital = selected.capital?.[0];
+
+      setSelectedData({ flag, currency, capital });
+
+      // Optional: auto-populate selectedData into form for preview (or debugging)
+      setForm((prev) => ({ ...prev, country: countryName }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
     if (!userId) return;
 
+    const payload = {
+      ...form,
+      user_id: userId,
+      ...selectedData,
+    };
+
     if (editingPostId) {
-      await axios.put(
-        `/api/posts/${editingPostId}`,
-        {
-          ...form,
-          user_id: userId,
-          ...selectedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axios.put(`/api/posts/${editingPostId}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
     } else {
-      await axios.post(
-        "/api/posts",
-        {
-          ...form,
-          user_id: userId,
-          ...selectedData,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axios.post("/api/posts", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
     }
 
     setEditingPostId(null);
-    setForm({
-      title: "",
-      content: "",
-      country: "",
-      visit_date: "",
-    });
-    location.reload(); // Refresh posts
+    setForm({ title: "", content: "", country: "", visit_date: "" });
+    setSelectedData({});
+    location.reload(); // You can refactor this to use setPosts instead
   };
 
   const handleEdit = (post) => {
@@ -125,7 +103,10 @@ export default function ProfilePage() {
   };
 
   const handleDelete = async (postId) => {
-    await axios.delete(`/api/posts/${postId}`);
+    const token = localStorage.getItem("token");
+    await axios.delete(`/api/posts/${postId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     setPosts(posts.filter((post) => post.id !== postId));
   };
 
@@ -148,14 +129,11 @@ export default function ProfilePage() {
           onChange={(e) => setForm({ ...form, content: e.target.value })}
           required
           className="w-full p-2 bg-[#1b263b] text-white rounded"
-        ></textarea>
+        />
 
         <select
           value={form.country}
-          onChange={(e) => {
-            setForm({ ...form, country: e.target.value });
-            handleSelectCountry(e.target.value);
-          }}
+          onChange={(e) => handleSelectCountry(e.target.value)}
           required
           className="w-full p-2 bg-[#1b263b] text-white rounded"
         >
@@ -175,6 +153,15 @@ export default function ProfilePage() {
           className="w-full p-2 bg-[#1b263b] text-white rounded"
         />
 
+        {/* Optional preview of selected country data */}
+        {selectedData.flag && (
+          <div className="flex items-center gap-4">
+            <img src={selectedData.flag} alt="flag" className="w-10 h-6" />
+            <p>Capital: {selectedData.capital}</p>
+            <p>Currency: {selectedData.currency}</p>
+          </div>
+        )}
+
         <button
           type="submit"
           className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
@@ -190,7 +177,7 @@ export default function ProfilePage() {
         posts.map((post) => (
           <div key={post.id} className="bg-[#1b263b] p-4 rounded mb-4">
             <h3 className="text-xl font-bold">{post.title}</h3>
-            <p>{post.content}</p>
+            <p className="mb-2">{post.content}</p>
             <p className="text-sm text-blue-300">
               Visited: {post.country} on {post.visit_date}
             </p>
@@ -198,7 +185,7 @@ export default function ProfilePage() {
               <img src={post.flag} alt="flag" className="w-12 mt-2" />
             )}
             <p className="text-sm">
-              Capital: {post.capital}, Currency: {post.currency}
+              Capital: {post.capital} | Currency: {post.currency}
             </p>
 
             <div className="mt-4">

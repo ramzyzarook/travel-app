@@ -4,10 +4,11 @@ import { NextResponse } from "next/server";
 // Get all posts (public)
 export async function GET() {
   try {
-    // Fetch posts with relevant data (title, author, country, date, likes, and comments)
+    // Fetch posts with full relevant data including content and country metadata
     const posts = db
       .prepare(
-        `SELECT posts.id, posts.title, posts.user_id, users.email AS author, posts.country, 
+        `SELECT posts.id, posts.title, posts.content, posts.user_id, users.email AS author, 
+                posts.country, posts.flag, posts.currency, posts.capital, posts.visit_date,
                 posts.created_at AS date, posts.likes, posts.comments
          FROM posts 
          JOIN users ON users.id = posts.user_id 
@@ -15,13 +16,18 @@ export async function GET() {
       )
       .all();
 
-    // Format posts to match the structure needed for the client
+    // Format posts for the frontend
     const formattedPosts = posts.map((post) => ({
       id: post.id,
       title: post.title,
-      user_id: post.user_id, // Included user_id here
+      content: post.content,
+      user_id: post.user_id,
       author: post.author,
       country: post.country,
+      flag: post.flag,
+      currency: post.currency,
+      capital: post.capital,
+      visit_date: post.visit_date,
       date: post.date,
       likes: post.likes,
       comments: post.comments,
@@ -37,7 +43,7 @@ export async function GET() {
   }
 }
 
-// Create a new post (for testing or future implementation)
+// Create a new post
 export async function POST(req) {
   try {
     const {
@@ -65,7 +71,7 @@ export async function POST(req) {
       flag,
       currency,
       capital,
-      new Date().toISOString() // Add timestamp for created_at
+      new Date().toISOString()
     );
 
     return NextResponse.json({ success: true, postId: info.lastInsertRowid });
