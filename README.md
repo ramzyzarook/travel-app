@@ -76,13 +76,13 @@ npm install
 npm run dev
 Go to http://localhost:3000 to explore the application.
 
-Notes
+```
+## Notes
 All country-related data is fetched dynamically via the RestCountries API.
 
 The application is designed for the course work and local use or further deployment via services like Vercel
 
-Author
+## Author
 Ramzy Zarook
 20211241/w1898911
-CSE Student | UoW
-```
+SE Student | UoW
