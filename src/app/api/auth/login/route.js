@@ -1,6 +1,6 @@
 import db from "../../../lib/db";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken"; // Install this package if you haven't already
+import jwt from "jsonwebtoken"; 
 
 const JWT_SECRET = process.env.JWT_SECRET;
 

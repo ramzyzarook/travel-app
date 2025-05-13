@@ -4,13 +4,13 @@ import { useState } from "react";
 import { toast } from "react-toastify"; // Import toast
 
 export default function ProfilePage() {
-  // Dummy user data
-  const initialUser = {
-    id: 1,
-    name: "John Doe",
-    email: "johndoe@example.com",
-    bio: "This is a short bio",
-  };
+  // // Dummy user data
+  // const initialUser = {
+  //   id: 1,
+  //   name: "John Doe",
+  //   email: "johndoe@example.com",
+  //   bio: "This is a short bio",
+  // };
 
   const [userData, setUserData] = useState(initialUser);
   const [isEditing, setIsEditing] = useState(false);
