@@ -67,8 +67,6 @@ Users can interact with posts, follow others, comment, and manage their own trav
 
 ## 🚀 Getting Started
 
-### 1. Clone the repository
-
 ```bash
 git clone https://github.com/ramzyzarook/travel-app.git
 cd traveltales
