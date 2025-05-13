@@ -1,41 +1,88 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 6COSC022W Coursework 2 (2023/24) - Description
 
-## Getting Started
+Design of web application and essay
 
-First, run the development server:
+TravelTales – A Global Journey Through Stories
+
+**TravelTales** is a full-stack travel blog platform where users can share personal travel experiences, enriched with real-time country data. Built with **Next.js App Router**, **SQLite**, and modern best practices, TravelTales offers a smooth, secure, and community-driven space for explorers to connect.
+
+## 🌍 Overview
+
+TravelTales brings together storytelling and geography. Each blog post is automatically enhanced with authentic country information including:
+
+- Country flag
+- Capital city
+- Currency
+- Languages
+
+Users can interact with posts, follow others, comment, and manage their own travel blog content. The platform balances usability, performance, and security in a cohesive design.
+
+---
+
+## ✨ Features
+
+### Public Features
+
+- Browse all blog posts
+- View posts enriched with real-time country data
+- Like/dislike and comment on posts
+
+### Authenticated Features
+
+- Register/login with secure password hashing
+- Create, edit, and delete blog posts
+- Follow and unfollow other users
+- View followers/following lists
+- See followed users’ posts on your personalized feed
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js (App Router), Tailwind CSS
+- **Backend**: Node.js (API routes in Next.js)
+- **Database**: SQLite with `better-sqlite3`
+- **Authentication**: Custom auth with bcrypt hashing
+- **Country Data API**: [RestCountries.com](https://restcountries.com)
+- **Deployment**: Local/Manual deployment-ready
+
+---
+
+## 🔐 Security Highlights
+
+- Passwords are hashed with **bcrypt** before storage
+- API routes check for proper authentication and authorization
+- Users can only edit/delete their own content
+- Follows, likes, and comments are validated against session identity
+
+---
+
+## 🧪 Testing & Performance
+
+- Lightweight SQLite ensures fast, local development
+- Routes are modular and easy to test individually
+- Optimized API calls and frontend state handling for responsive UX
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
 
 ```bash
+git clone https://github.com/ramzyzarook/travel-app.git
+cd traveltales
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Go to http://localhost:3000 to explore the application.
+
+Notes
+All country-related data is fetched dynamically via the RestCountries API.
+
+The application is designed for the course work and local use or further deployment via services like Vercel
+
+Author
+Ramzy Zarook
+20211241/w1898911
+CSE Student | UoW
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-# travel-app
-TravelTales: A Global Journey Through Stories Welcome to TravelTales, a vibrant community-driven platform where wanderlust meets storytelling. Our platform seamlessly integrates real-time country data with personal travel experiences, creating a unique space for travellers to share their adventures and connect with fellow explorers worldwide.
->>>>>>> 538c090d5f49b7d7723d4b5e11507ff643f5719b
